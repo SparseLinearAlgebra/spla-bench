@@ -1,5 +1,4 @@
 import argparse
-from ctypes import ArgumentError
 import sys
 import urllib.request
 import base64
@@ -37,7 +36,7 @@ def download_by_url(url: str, dest: str = None):
                 return tarfile.open(arhive_path, "r:gz")
             elif url.endswith('.tar'):
                 return tarfile.open(arhive_path, "r:")
-            raise ArgumentError(f'Archive {url} is not of type \'tar\'')
+            raise Exception(f'Archive {url} is not of type \'tar\'')
 
         with urllib.request.urlopen(url) as url_file:
             content = url_file.read()
@@ -133,7 +132,7 @@ def main(arg_strings: List[str]) -> bool:
     elif args.name:
         download(args.name, False, use_cached)
     else:
-        raise ArgumentError(
+        raise Exception(
             "At least one argument from 'all', 'url' or 'name' must be provided")
 
     return success
