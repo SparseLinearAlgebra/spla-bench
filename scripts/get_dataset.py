@@ -27,8 +27,8 @@ def download_by_url(url: str, dest: str = None):
         os.makedirs(DATASETS_FOLDER)
 
     with tempfile.TemporaryDirectory() as temp_folder:
-        arhive_path = f'{temp_folder}/archive'
-        archive_folder = f'{temp_folder}/unarchived'
+        arhive_path = os.path.join(temp_folder, 'archive')
+        archive_folder = os.path.join(temp_folder, 'unarchived')
 
         os.makedirs(archive_folder)
 
@@ -52,7 +52,7 @@ def download_by_url(url: str, dest: str = None):
         archive_contents = []
         for dirpath, dirnames, filenames in os.walk(archive_folder):
             archive_contents.extend(
-                list(map(lambda d: f'{dirpath}/{d}', filenames + dirnames)))
+                list(map(lambda d: os.path.join(dirpath, d), filenames + dirnames)))
         archive_contents = list(
             filter(lambda filename: filename.endswith('.mtx'), archive_contents))
         contents_str = ', '.join(archive_contents)
@@ -79,7 +79,7 @@ def get_dest_path(s: str, is_url: bool) -> str:
 
         file_name = f'{url_file_name_no_ext}-{hash[:8]}'
 
-    return f'./{DATASETS_FOLDER}/{file_name}'
+    return os.path.join(DATASETS_FOLDER, file_name)
 
 
 def download(s: str, is_url: bool, use_cached: bool):
