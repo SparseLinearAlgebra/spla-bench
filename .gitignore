@@ -4,6 +4,9 @@
 ## Build files
 /cmake-build-*
 
+## Python files
+/**/__pycache__
+
 CMakeLists.txt.user
 CMakeCache.txt
 CMakeFiles
