@@ -30,6 +30,8 @@
 
 #include "BenchmarkParams.hpp"
 
+#include <memory>
+
 namespace bench {
 
     class Benchmark {

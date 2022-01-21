@@ -29,24 +29,7 @@ Part of the Spla research project.
 ### Dataset
 
 Matrices from the SuiteSparse Matrix Collection (formerly the University of Florida Sparse Matrix Collection).
-
-Datasets could be downloaded from [sparse.tamu.edu](https://sparse.tamu.edu/) with the script: `scripts/get_dataset.py'
-
-To see usage type
-
-```shell
-$ python3 scripts/get_dataset.py -h
-
-usage: get_dataset.py [-h] [--all] [--name NAME] [--url URL] [--print] [--ignore_cached]
-
-optional arguments:
-  -h, --help       show this help message and exit
-  --all            Download all datasets
-  --name NAME      Download dataset by name
-  --url URL        Download dataset by url
-  --print          Print all default datasets
-  --ignore_cached  Ignore cached datasets
-```
+Datasets could be downloaded from [sparse.tamu.edu](https://sparse.tamu.edu/).
 
 ## Build instructions
 
@@ -79,6 +62,33 @@ Pass extra options to disable build of some tools:
  - `-DBENCH_WITH_SUITESPARSE=NO` - exclude <suitesparse> in benchmark build (default YES)
  - `-DBENCH_WITH_GRAPHBLAST=NO` - exclude <graphblast> in benchmark build (default YES)
  - `-DBENCH_WITH_GUNROCK=NO` - exclude <gunrock> in benchmark build (default YES)
+
+## Download dataset
+
+The following code snippet allows downloading, unpack and store locally all required
+graph matrices for benchmarking. Downloading is done by `dataset.py` script inside `scripts` folder.
+Must be executed inside root folder.
+
+```shell
+$ python3 scripts/dataset.py --all
+```
+
+See `-h` option to get more info about available script features.
+Must be executed inside root folder.
+
+```shell
+$ python3 scripts/dataset.py -h
+
+usage: dataset.py [-h] [--all] [--name NAME] [--url URL] [--print] [--ignore_cached]
+
+optional arguments:
+  -h, --help       show this help message and exit
+  --all            Download all datasets
+  --name NAME      Download dataset by name
+  --url URL        Download dataset by url
+  --print          Print all default datasets
+  --ignore_cached  Ignore cached datasets
+```
 
 ## Directory structure
 

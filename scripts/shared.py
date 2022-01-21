@@ -1,6 +1,16 @@
 import pathlib
 import platform
 
+__all__ = [
+    "ROOT",
+    "DATASET",
+    "BUILD",
+    "SYSTEM",
+    "EXECUTABLE_EXT",
+    "TARGET_SUFFIX",
+    "TARGET"
+]
+
 ROOT = pathlib.Path(__file__).parent.parent
 DATASET = ROOT / "dataset"
 BUILD = ROOT / "build"

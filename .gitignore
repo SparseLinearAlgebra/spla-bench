@@ -1,4 +1,4 @@
-# Idea files
+## Idea files
 .idea
 
 ## Build files
@@ -7,6 +7,7 @@
 ## Python files
 /**/__pycache__
 
+## Tamplate generated
 CMakeLists.txt.user
 CMakeCache.txt
 CMakeFiles
@@ -19,5 +20,5 @@ compile_commands.json
 CTestTestfile.cmake
 _deps
 
-## Datasets
-datasets
+## Datasets downloaded matrices
+/dataset

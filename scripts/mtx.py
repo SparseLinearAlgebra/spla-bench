@@ -1,5 +1,3 @@
-import shared
-
 __all__ = [
     "load",
     "save"
