@@ -5,6 +5,10 @@ import subprocess
 import driver
 import shared
 
+__all__ = [
+    "DriverSpla"
+]
+
 
 class DriverSpla(driver.Driver):
     """
@@ -42,7 +46,7 @@ class DriverSpla(driver.Driver):
 
     def run_tc(self, matrix_path, num_iterations, directed) -> driver.ExecutionResult:
         output = subprocess.check_output(
-            [str(self.exec_dir / self.spla_sssp),
+            [str(self.exec_dir / self.spla_tc),
              f"--mtxpath={matrix_path}",
              f"--niters={num_iterations}",
              f"--directed={directed}"])
