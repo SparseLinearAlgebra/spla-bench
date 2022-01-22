@@ -5,6 +5,7 @@ __all__ = [
     "ROOT",
     "DATASET",
     "BUILD",
+    "DEPS",
     "SYSTEM",
     "EXECUTABLE_EXT",
     "TARGET_SUFFIX",
@@ -14,6 +15,7 @@ __all__ = [
 ROOT = pathlib.Path(__file__).parent.parent
 DATASET = ROOT / "dataset"
 BUILD = ROOT / "build"
+DEPS = ROOT / "deps"
 
 SYSTEM = {'Darwin': 'macos', 'Linux': 'linux', 'Windows': 'windows'}[platform.system()]
 EXECUTABLE_EXT = {'macos': '', 'windows': '.exe', 'linux': ''}[SYSTEM]
