@@ -1,0 +1,3 @@
+[submodule "deps/graphblast"]
+	path = deps/graphblast
+	url = https://github.com/gunrock/graphblast.git

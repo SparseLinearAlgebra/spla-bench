@@ -46,6 +46,26 @@ $ cd spla-bench
 $ git submodule update --init --recursive
 ```
 
+### Build third-party tools
+
+#### GraphBLAST
+
+Prerequisites:
+ - Cuda NVCC compiler
+ - Compatible GCC version compile
+ - Boost library
+ - Make
+
+To build library execute the following script.
+Must be executed inside root folder.
+
+```shell
+$ python scripts/build_graphblast.py
+```
+
+After successful build executable benchmark applications `gbfs`, `gsssp`, `gcc`, `gtc`
+will be located inside `deps/graphblast/bin` directory.
+
 ### Download dataset
 
 The following code snippet allows downloading, unpack and store locally all required
@@ -60,7 +80,7 @@ See `-h` option to get more info about available script features.
 Must be executed inside root folder.
 
 ```shell
-$ python3 scripts/dataset.py -h
+$ python scripts/dataset.py -h
 
 usage: dataset.py [-h] [--all] [--name NAME] [--url URL] [--print] [--ignore_cached]
 

@@ -4,6 +4,10 @@
 ## Build files
 /cmake-build-*
 
+## Build files inside deps directory
+/deps/**/build
+/deps/**/bin
+
 ## Python files
 /**/__pycache__
 
