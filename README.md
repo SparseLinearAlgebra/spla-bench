@@ -51,8 +51,8 @@ $ git submodule update --init --recursive
 #### GraphBLAST
 
 Prerequisites:
- - Cuda NVCC compiler
- - Compatible GCC version compile
+ - Cuda Toolkit
+ - Compatible GCC (8 for CUDA 10)
  - Boost library
  - Make
 
@@ -66,6 +66,24 @@ $ python scripts/build_graphblast.py
 After successful build executable benchmark applications `gbfs`, `gsssp`, `gcc`, `gtc`
 will be located inside `deps/graphblast/bin` directory.
 
+#### Gunrock
+
+Prerequisites:
+- Cuda Toolkit
+- Compatible GCC (8 for CUDA 10)
+- Boost library
+- CMake & Make
+
+To build library execute the following script.
+Must be executed inside root folder.
+
+```shell
+$ python scripts/build_gunrock.py
+```
+
+After successful build executable benchmark applications `bfs`, `sssp`, `tc`
+will be located inside `deps/gunrock/build/bin` directory.
+
 ### Download dataset
 
 The following code snippet allows downloading, unpack and store locally all required
@@ -73,7 +91,7 @@ graph matrices for benchmarking. Downloading is done by `dataset.py` script insi
 Must be executed inside root folder.
 
 ```shell
-$ python3 scripts/dataset.py --all
+$ python scripts/dataset.py --all
 ```
 
 See `-h` option to get more info about available script features.

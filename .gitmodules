@@ -1,3 +1,6 @@
 [submodule "deps/graphblast"]
 	path = deps/graphblast
 	url = https://github.com/gunrock/graphblast.git
+[submodule "deps/gunrock"]
+	path = deps/gunrock
+	url = https://github.com/gunrock/gunrock.git
