@@ -16,7 +16,9 @@ __all__ = [
 DATASETS = {
     '1128_bus': 'https://suitesparse-collection-website.herokuapp.com/MM/HB/1138_bus.tar.gz',
     'abb313': 'https://suitesparse-collection-website.herokuapp.com/MM/HB/abb313.tar.gz',
-    'bcspwr03': 'https://suitesparse-collection-website.herokuapp.com/MM/HB/bcspwr03.tar.gz'
+    'bcspwr03': 'https://suitesparse-collection-website.herokuapp.com/MM/HB/bcspwr03.tar.gz',
+    'soc-LiveJournal': 'https://suitesparse-collection-website.herokuapp.com/MM/SNAP/soc-LiveJournal1.tar.gz',
+    'hollywood-09': 'https://suitesparse-collection-website.herokuapp.com/MM/LAW/hollywood-2009.tar.gz'
 }
 
 DATASETS_FOLDER = shared.DATASET
