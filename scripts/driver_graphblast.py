@@ -55,14 +55,12 @@ class DriverGraphBLAST(driver.Driver):
     @staticmethod
     def _parse_output(output, n):
         lines = output.decode("ASCII").replace("\r", "").split("\n")
-
         warmup = 0.0
         tight = 0.0
-
         for line in lines:
             if line.startswith("warmup"):
-                warmup = line.replace(",", "").split(" ")[1]
+                warmup = float(line.replace(",", "").split(" ")[1])
             if line.startswith("tight"):
-                tight = line.replace(",", "").split(" ")[1]
+                tight = float(line.replace(",", "").split(" ")[1])
 
         return driver.ExecutionResult(warmup, [tight] * n)
