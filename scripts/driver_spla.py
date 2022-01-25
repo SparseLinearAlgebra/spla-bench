@@ -55,6 +55,11 @@ class DriverSpla(driver.Driver):
     @staticmethod
     def _parse_output(output):
         lines = output.decode("ASCII").replace("\r", "").split("\n")
-        warm_up = float(lines[0].split(" ")[1])
-        times = [float(v) for v in lines[1].split(" ")[1:-1]]
-        return driver.ExecutionResult(warm_up, times)
+        warmup = 0.0
+        runs = []
+        for line in lines:
+            if line.startswith("warm-up(ms):"):
+                warmup = float(line.split(" ")[1])
+            if line.startswith("iters(ms):"):
+                runs = [float(v) for v in line.split(" ")[1:-1]]
+        return driver.ExecutionResult(warmup, runs)
