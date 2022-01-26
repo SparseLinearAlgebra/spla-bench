@@ -99,6 +99,7 @@ class TemporarySourcesFile():
 
 
 def make_sources_content(sources: List[int]):
+    n = len(sources)
     sources = '\n'.join(map(str, sources))
 
     return f'''
@@ -106,13 +107,6 @@ def make_sources_content(sources: List[int]):
 %-------------------------------------------------------------------------------
 % Temporary sources file
 %-------------------------------------------------------------------------------
-{len(sources)} 1
+{n} 1
 {sources}
 '''.encode('ascii')
-
-
-lagraph_root = pathlib.Path('deps/lagraph/build/')
-
-matrix_path = './dataset/soc-LiveJournal.mtx'
-
-DriverLaGraph(lagraph_root).run_bfs(matrix_path, 0, 10)
