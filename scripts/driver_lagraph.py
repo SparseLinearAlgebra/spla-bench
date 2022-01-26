@@ -19,8 +19,10 @@ class DriverLaGraph(driver.Driver):
     Use `BENCH_DRIVER_LAGRAPH` env variable to specify custom path to lagraph driver
     """
 
-    def __init__(self):
-        self.exec_dir = shared.DEPS / "lagraph" / "build" / "src" / "benchmark"
+    def __init__(self, lagraph_root = shared.DEPS / "lagraph"):
+        self.exec_dir = lagraph_root / "build" / "src" / "benchmark"
+        if os.path.exists(self.exec_dir):
+            raise Exception(f'LaGraph exec dir does not exist, where it should be: {self.exec_dir}')
         self.lagraph_bfs = "bfs_demo" + shared.EXECUTABLE_EXT
         self.lagraph_sssp = "sssp_demo" + shared.EXECUTABLE_EXT
         self.lagraph_tc = "tc_demo" + shared.EXECUTABLE_EXT
@@ -34,7 +36,7 @@ class DriverLaGraph(driver.Driver):
     def run_bfs(self, matrix_path) -> driver.ExecutionResult:
         output = subprocess.check_output(
             [str(self.exec_dir / self.lagraph_bfs), matrix_path])
-        return DriverLaGraph._parse_output(output, "parent only ", 9, "nthreads: ", 2)
+        return DriverLaGraph._parse_output(output, "parent only", 9, "warmup", 4)
 
     def run_sssp(self, matrix_path) -> driver.ExecutionResult:
         output = subprocess.check_output(
@@ -52,13 +54,14 @@ class DriverLaGraph(driver.Driver):
                       trial_line_token: int,
                       warmup_line_start: str = None,
                       warmup_line_token: int = None):
+        time_factor = 1000
         lines = output.decode("ASCII").split("\n")
         trials = []
         for trial_line in lines_startswith(lines, trial_line_start):
-            trials.append(float(tokenize(trial_line)[trial_line_token]) * 1000)
+            trials.append(float(tokenize(trial_line)[trial_line_token]) * time_factor)
         warmup = 0
         if warmup_line_start is not None:
-            warmup = float(tokenize(lines_startswith(lines, warmup_line_start)[0])[warmup_line_token]) * 1000
+            warmup = float(tokenize(lines_startswith(lines, warmup_line_start)[0])[warmup_line_token]) * time_factor
         return driver.ExecutionResult(warmup, trials)
 
 
@@ -68,12 +71,3 @@ def lines_startswith(lines: List[str], token) -> List[str]:
 
 def tokenize(line: str) -> List[str]:
     return list(filter(lambda x: x, line.split(' ')))
-
-
-import sys
-
-
-def main():
-    path = sys.argv[1]
-    driver = DriverLaGraph()
-    print(driver.run_bfs(path))
