@@ -60,12 +60,21 @@ def build_graphblas(output_directory: str, env_vars: Dict[str, str], jobs: int, 
         print(
             f'Cloning GraphBLAS from {SUITESPARSE_GITHUB} to the {output_directory}')
         subprocess.check_call(
-            ['git', 'clone', '--recursive', SUITESPARSE_GITHUB, output_directory])
-        subprocess.check_call(
-            ['git', 'checkout', SUITESPRSE_BRANCH]
-        )
+            ['git', 'clone', '--recursive',
+             SUITESPARSE_GITHUB, output_directory])
     else:
         print(f'GraphBLAS is already cloned to the {output_directory}')
+
+    gb_current_branch = (subprocess.check_output(['git', 'status'], cwd=output_directory)
+                         .decode('ascii')
+                         .split('\n')[0]
+                         .split(' ')[2])
+    if gb_current_branch != SUITESPRSE_BRANCH:
+        print(f'Checking out branch {SUITESPRSE_BRANCH}')
+        subprocess.check_call(['git', 'checkout', SUITESPRSE_BRANCH],
+                              cwd=output_directory)
+    else:
+        print(f'On the branch {SUITESPRSE_BRANCH}')
 
     print(f'Building GraphBLAS in the {gb_build}')
 
@@ -90,7 +99,8 @@ def build_graphblas(output_directory: str, env_vars: Dict[str, str], jobs: int, 
 
 def install_graphblas(grb_url: str, output_directory: str, ignore_cached: bool) -> Tuple[str, str]:
     graphblas_include = os.path.join(output_directory, 'include')
-    graphblas_library = os.path.join(output_directory, 'lib', 'libgraphblas' + shared.TARGET_SUFFIX)
+    graphblas_library = os.path.join(
+        output_directory, 'lib', 'libgraphblas' + shared.TARGET_SUFFIX)
 
     if not os.path.exists(output_directory):
         os.makedirs(output_directory)
