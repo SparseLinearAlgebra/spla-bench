@@ -73,7 +73,7 @@ def build_lagraph(graphblas_root: str, lagraph_root: str, env_vars: Dict[str, st
     targets_paths = list(
         map(lambda t: os.path.join(targets_dir, t), LAGRAPH_TARGETS))
 
-    all_targets_str = '\t' + '\t\n'.join(targets_paths)
+    all_targets_str = '\t' + '\n\t'.join(targets_paths)
 
     if not force_rebuild and check_paths_exist(targets_paths):
         print(f'All targets are already built: {all_targets_str}')

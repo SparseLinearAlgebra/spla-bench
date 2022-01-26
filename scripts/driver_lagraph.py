@@ -47,12 +47,12 @@ class DriverLaGraph(driver.Driver):
         return DriverLaGraph._parse_output(output, "trial ", 2, "nthreads: ", 3)
 
     @staticmethod
-    def _parse_output(output: str,
+    def _parse_output(output: bytes,
                       trial_line_start: str,
                       trial_line_token: int,
                       warmup_line_start: str = None,
                       warmup_line_token: int = None):
-        lines = output.split("\n")
+        lines = output.decode("ASCII").split("\n")
         trials = []
         for trial_line in lines_startswith(lines, trial_line_start):
             trials.append(float(tokenize(trial_line)[trial_line_token]) * 1000)
