@@ -2,6 +2,7 @@ import os
 import pathlib
 import subprocess
 import re
+import tempfile
 
 from typing import List
 
@@ -23,7 +24,8 @@ class DriverLaGraph(Driver):
     def __init__(self, lagraph_build_root: pathlib.Path):
         self.exec_dir = lagraph_build_root / "src" / "benchmark"
         if not os.path.exists(self.exec_dir):
-            raise Exception(f'LaGraph exec dir does not exist, where it should be: {self.exec_dir}')
+            raise Exception(
+                f'LaGraph exec dir does not exist, where it should be: {self.exec_dir}')
         self.lagraph_bfs = "bfs_demo" + shared.EXECUTABLE_EXT
         self.lagraph_sssp = "sssp_demo" + shared.EXECUTABLE_EXT
         self.lagraph_tc = "tc_demo" + shared.EXECUTABLE_EXT
@@ -34,15 +36,23 @@ class DriverLaGraph(Driver):
         except KeyError:
             pass
 
-    def run_bfs(self, matrix_path) -> ExecutionResult:
-        output = subprocess.check_output(
-            [str(self.exec_dir / self.lagraph_bfs), matrix_path])
-        return DriverLaGraph._parse_output(output, "parent only", 9, "warmup", 4)
+    def run_bfs(self, matrix_path, source_vertex, num_iterations) -> ExecutionResult:
+        with tempfile.NamedTemporaryFile() as sources_file:
+            sources_file.write(make_sources_content(
+                [source_vertex + 1] * num_iterations))
+            sources_file.flush()
+            output = subprocess.check_output(
+                [str(self.exec_dir / self.lagraph_bfs), matrix_path, sources_file.name])
+            return DriverLaGraph._parse_output(output, "parent only", 9, "warmup", 4)
 
-    def run_sssp(self, matrix_path) -> ExecutionResult:
-        output = subprocess.check_output(
-            [str(self.exec_dir / self.lagraph_sssp), matrix_path])
-        return DriverLaGraph._parse_output(output, "sssp", 8)
+    def run_sssp(self, matrix_path, source_vertex, num_iterations) -> ExecutionResult:
+        with tempfile.NamedTemporaryFile() as sources_file:
+            sources_file.write(make_sources_content(
+                [source_vertex + 1] * num_iterations))
+            sources_file.flush()
+            output = subprocess.check_output(
+                [str(self.exec_dir / self.lagraph_sssp), matrix_path, sources_file.name])
+            return DriverLaGraph._parse_output(output, "sssp", 8)
 
     def run_tc(self, matrix_path) -> ExecutionResult:
         output = subprocess.check_output(
@@ -59,10 +69,12 @@ class DriverLaGraph(Driver):
         lines = output.decode("ASCII").split("\n")
         trials = []
         for trial_line in lines_startswith(lines, trial_line_start):
-            trials.append(float(tokenize(trial_line)[trial_line_token]) * time_factor)
+            trials.append(float(tokenize(trial_line)[
+                          trial_line_token]) * time_factor)
         warmup = 0
         if warmup_line_start is not None:
-            warmup = float(tokenize(lines_startswith(lines, warmup_line_start)[0])[warmup_line_token]) * time_factor
+            warmup = float(tokenize(lines_startswith(lines, warmup_line_start)[0])[
+                           warmup_line_token]) * time_factor
         return ExecutionResult(warmup, trials)
 
 
@@ -72,3 +84,22 @@ def lines_startswith(lines: List[str], token) -> List[str]:
 
 def tokenize(line: str) -> List[str]:
     return list(filter(lambda x: x, line.split(' ')))
+
+
+def make_sources_content(sources: List[int]):
+    sources = '\n'.join(map(str, sources))
+
+    return f'''
+%%MatrixMarket matrix array real general
+%-------------------------------------------------------------------------------
+% Temporary sources file
+%-------------------------------------------------------------------------------
+{len(sources)} 1
+{sources}
+'''.encode('ascii')
+
+lagraph_root = pathlib.Path('deps/lagraph/build/')
+
+matrix_path = './dataset/soc-LiveJournal.mtx'
+
+DriverLaGraph(lagraph_root).run_bfs(matrix_path, 0, 10)
