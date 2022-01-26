@@ -131,12 +131,14 @@ def build_lagraph(graphblas_include: str, graphblas_library: str, lagraph_root: 
     lagraph_root = os.path.abspath(lagraph_root)
 
     config = {
-        'GraphBLAS include: ': graphblas_include,
-        'GraphBLAS library: ': graphblas_library,
-        'LaGraph root:      ': lagraph_root
+        'GraphBLAS include': graphblas_include,
+        'GraphBLAS library': graphblas_library,
+        'LaGraph root     ': lagraph_root
     }
 
-    print(f'Building LaGraph with configuration: {config}')
+    print('Building LaGraph with configuration:',
+          '\n'.join(map(lambda kv: f'{kv[0]}: `{kv[1]}`', config.items())),
+          sep='\n')
 
     lagraph_build_dir = os.path.join(lagraph_root, 'build')
 
