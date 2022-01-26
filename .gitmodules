@@ -4,3 +4,6 @@
 [submodule "deps/gunrock"]
 	path = deps/gunrock
 	url = https://github.com/gunrock/gunrock.git
+[submodule "deps/lagraph"]
+	path = deps/lagraph
+	url = https://github.com/GraphBLAS/LAGraph
