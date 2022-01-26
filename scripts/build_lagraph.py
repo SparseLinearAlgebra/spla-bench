@@ -97,6 +97,15 @@ def build_graphblas(output_directory: str, env_vars: Dict[str, str], jobs: int, 
     return gb_include, gb_library
 
 
+def validate_graphblas(gb_include, gb_library):
+    if not check_paths_exist([gb_library]):
+        raise Exception(f'This GraphBLAS library does not exist: {gb_library}')
+    if not check_paths_exist([gb_include]):
+        raise Exception(f'This GraphBLAS include path does not exist: {gb_include}')
+
+    return gb_include, gb_library
+
+
 def install_graphblas(grb_url: str, output_directory: str, ignore_cached: bool) -> Tuple[str, str]:
     graphblas_include = os.path.join(output_directory, 'include')
     graphblas_library = os.path.join(
@@ -251,8 +260,8 @@ def main(args: List[str]) -> None:
     if not os.path.exists(args.lg):
         raise Exception(f'LaGraph path does not exist: {args.lg}')
 
-    gb_include_path = args.gb_include
-    gb_library_path = args.gb_library
+    gb_include_path = None
+    gb_library_path = None
 
     gb_method = 'local'
 
@@ -266,12 +275,16 @@ def main(args: List[str]) -> None:
         gb_include_path, gb_library_path = install_graphblas(args.grb_url,
                                                              args.gb_download,
                                                              args.ignore_cached_grb)
-    if gb_build:
+    elif gb_build:
         gb_method = 'git'
         gb_include_path, gb_library_path = build_graphblas(args.gb_build,
                                                            env_vars,
                                                            args.jobs,
                                                            args.force_rebuild_gb)
+    else:
+        gb_method = 'local'
+        gb_include_path, gb_library_path = validate_graphblas(args.gb_include, args.gb_library)
+
     build_lagraph(gb_include_path,
                   gb_library_path,
                   args.lg,
