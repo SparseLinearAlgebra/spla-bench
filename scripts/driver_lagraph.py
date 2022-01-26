@@ -2,7 +2,8 @@ import os
 import pathlib
 import subprocess
 import re
-import tempfile
+import shutil
+import time
 
 from typing import List
 
@@ -37,19 +38,13 @@ class DriverLaGraph(Driver):
             pass
 
     def run_bfs(self, matrix_path, source_vertex, num_iterations) -> ExecutionResult:
-        with tempfile.NamedTemporaryFile() as sources_file:
-            sources_file.write(make_sources_content(
-                [source_vertex + 1] * num_iterations))
-            sources_file.flush()
+        with TemporarySourcesFile([source_vertex + 1] * num_iterations) as sources_file:
             output = subprocess.check_output(
                 [str(self.exec_dir / self.lagraph_bfs), matrix_path, sources_file.name])
             return DriverLaGraph._parse_output(output, "parent only", 9, "warmup", 4)
 
     def run_sssp(self, matrix_path, source_vertex, num_iterations) -> ExecutionResult:
-        with tempfile.NamedTemporaryFile() as sources_file:
-            sources_file.write(make_sources_content(
-                [source_vertex + 1] * num_iterations))
-            sources_file.flush()
+        with TemporarySourcesFile([source_vertex + 1] * num_iterations) as sources_file:
             output = subprocess.check_output(
                 [str(self.exec_dir / self.lagraph_sssp), matrix_path, sources_file.name])
             return DriverLaGraph._parse_output(output, "sssp", 8)
@@ -86,6 +81,23 @@ def tokenize(line: str) -> List[str]:
     return list(filter(lambda x: x, line.split(' ')))
 
 
+class TemporarySourcesFile():
+    def __init__(self, sources: List[int]):
+        self.name = f'sources_{str(time.ctime())}_.mtx'
+        self.freeze = False
+        self.fd = None
+        self.sources = sources
+
+    def __enter__(self):
+        with open(self.name, 'wb') as sources_file:
+            sources_file.write(make_sources_content(self.sources))
+        return self
+
+    def __exit__(self, type, value, traceback):
+        if not self.freeze:
+            os.remove(self.name)
+
+
 def make_sources_content(sources: List[int]):
     sources = '\n'.join(map(str, sources))
 
@@ -97,6 +109,7 @@ def make_sources_content(sources: List[int]):
 {len(sources)} 1
 {sources}
 '''.encode('ascii')
+
 
 lagraph_root = pathlib.Path('deps/lagraph/build/')
 
