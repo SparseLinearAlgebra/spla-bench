@@ -36,14 +36,14 @@ SUITESPRSE_BRANCH = 'v6.1.4'
 
 
 def check_paths_exist(paths: List[str]) -> bool:
-    return sum(map(lambda p: not os.path.exists(p), paths)) == 0
+    return all(map(lambda p: not os.path.exists(p), paths)) == 0
 
 
 def build_graphblas(output_directory: str, env_vars: Dict[str, str], jobs: int, force_rebuild: bool) -> Tuple[str, str]:
     if not os.path.exists(output_directory):
         os.makedirs(output_directory)
 
-    gb_include = os.path.join(output_directory, 'include')
+    gb_include = os.path.join(output_directory, 'Include')
     gb_build = os.path.join(output_directory, 'build')
     gb_library = os.path.join(gb_build, 'libgraphblas' + shared.TARGET_SUFFIX)
 
