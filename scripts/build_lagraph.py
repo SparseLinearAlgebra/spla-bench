@@ -36,7 +36,7 @@ SUITESPRSE_BRANCH = 'v6.1.4'
 
 
 def check_paths_exist(paths: List[str]) -> bool:
-    return all(map(lambda p: not os.path.exists(p), paths)) == 0
+    return sum(map(lambda p: not os.path.exists(p), paths)) == 0
 
 
 def build_graphblas(output_directory: str, env_vars: Dict[str, str], jobs: int, force_rebuild: bool) -> Tuple[str, str]:
