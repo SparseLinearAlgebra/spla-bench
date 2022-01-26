@@ -16,7 +16,11 @@ import shared
 
 DEFAULT_GRB_VERSION = '6.1.4'
 DEFAULT_CONDA_GRB_PACKAGE_HASH = 'h9c3ff4c'
-LAGRAPH_TARGETS = ['bfs_demo', 'tc_demo', 'sssp_demo']
+LAGRAPH_TARGETS = [
+    'bfs_demo' + shared.EXECUTABLE_EXT,
+    'tc_demo' + shared.EXECUTABLE_EXT,
+    'sssp_demo' + shared.EXECUTABLE_EXT
+]
 
 
 def check_paths_exist(paths: List[str]) -> bool:
@@ -66,7 +70,8 @@ def build_lagraph(graphblas_root: str, lagraph_root: str, env_vars: Dict[str, st
     lagraph_build_dir = os.path.join(lagraph_root, 'build')
 
     targets_dir = os.path.join(lagraph_build_dir, 'src', 'benchmark')
-    targets_paths = list(map(lambda t: os.path.join(targets_dir, t), LAGRAPH_TARGETS))
+    targets_paths = list(
+        map(lambda t: os.path.join(targets_dir, t), LAGRAPH_TARGETS))
 
     all_targets_str = '\t' + '\t\n'.join(targets_paths)
 
@@ -94,7 +99,8 @@ def build_lagraph(graphblas_root: str, lagraph_root: str, env_vars: Dict[str, st
     subprocess.check_call(['make'] + make_jobs_arg, cwd=lagraph_build_dir)
 
     if not check_paths_exist(targets_paths):
-        raise Exception(f'All of the following targets were expected to build, but some did not: {all_targets_str}')
+        raise Exception(
+            f'All of the following targets were expected to build, but some did not: {all_targets_str}')
 
     print(f'Successfully built LaGraph: {all_targets_str}')
 
