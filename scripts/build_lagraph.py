@@ -89,9 +89,8 @@ def build_graphblas(output_directory: str, env_vars: Dict[str, str], jobs: int, 
 
 
 def install_graphblas(grb_url: str, output_directory: str, ignore_cached: bool) -> Tuple[str, str]:
-    graphblas_include = os.path(output_directory) / 'include'
-    graphblas_library = os.path(output_directory) / \
-        'lib' / 'libgraphblas' + shared.TARGET_SUFFIX
+    graphblas_include = os.path.join(output_directory, 'include')
+    graphblas_library = os.path.join(output_directory, 'lib', 'libgraphblas' + shared.TARGET_SUFFIX)
 
     if not os.path.exists(output_directory):
         os.makedirs(output_directory)
