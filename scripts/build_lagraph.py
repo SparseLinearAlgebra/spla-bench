@@ -11,6 +11,8 @@ import traceback
 
 from typing import List, Dict
 
+import shared
+
 
 DEFAULT_GRB_VERSION = '6.1.4'
 DEFAULT_CONDA_GRB_PACKAGE_HASH = 'h9c3ff4c'
@@ -115,10 +117,10 @@ def main(args: List[str]) -> None:
                         default=None,
                         help='Path to CXX compiler (automatically detected by cmake by default)')
     parser.add_argument('--gb',
-                        default='./graphblas',
+                        default=os.path.join(shared.DEPS, 'graphblast'),
                         help='GraphBLAS.SuiteSparse download dir')
     parser.add_argument('--lg',
-                        required=True,
+                        default=os.path.jon(shared.DEPS, 'lagraph'),
                         help='LaGraph source directory')
     parser.add_argument('--grb_url',
                         default=f'https://anaconda.org/conda-forge/graphblas/{DEFAULT_GRB_VERSION}/download/linux-64/graphblas-{DEFAULT_GRB_VERSION}-{DEFAULT_CONDA_GRB_PACKAGE_HASH}_0.tar.bz2',
