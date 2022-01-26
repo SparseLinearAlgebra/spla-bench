@@ -125,7 +125,7 @@ def install_graphblas(grb_url: str, output_directory: str, ignore_cached: bool) 
     return graphblas_include, graphblas_library
 
 
-def build_lagraph(graphblas_include: str, graphblas_library: str, lagraph_root: str, env_vars: Dict[str, str], jobs: int, force_rebuild: bool) -> None:
+def build_lagraph(graphblas_include: str, graphblas_library: str, lagraph_root: str, env_vars: Dict[str, str], jobs: int, gb_method: str, force_rebuild: bool) -> None:
     graphblas_include = os.path.abspath(graphblas_include)
     graphblas_library = os.path.abspath(graphblas_library)
     lagraph_root = os.path.abspath(lagraph_root)
@@ -140,7 +140,7 @@ def build_lagraph(graphblas_include: str, graphblas_library: str, lagraph_root: 
           '\n'.join(map(lambda kv: f'{kv[0]}: `{kv[1]}`', config.items())),
           sep='\n')
 
-    lagraph_build_dir = os.path.join(lagraph_root, 'build')
+    lagraph_build_dir = os.path.join(lagraph_root, 'build_' + gb_method)
 
     targets_dir = os.path.join(lagraph_build_dir, 'src', 'benchmark')
     targets_paths = list(
@@ -245,16 +245,20 @@ def main(args: List[str]) -> None:
     gb_include_path = args.gb_include
     gb_library_path = args.gb_library
 
+    gb_method = 'local'
+
     env_vars = clear_empty_vals({
         'CC': args.cc,
         'CXX': args.cxx
     })
 
     if gb_download:
+        gb_method = 'conda'
         gb_include_path, gb_library_path = install_graphblas(args.grb_url,
                                                              args.gb_download,
                                                              args.ignore_cached_grb)
     if gb_build:
+        gb_method = 'git'
         gb_include_path, gb_library_path = build_graphblas(args.gb_build,
                                                            env_vars,
                                                            args.jobs,
@@ -264,6 +268,7 @@ def main(args: List[str]) -> None:
                   args.lg,
                   env_vars,
                   args.jobs,
+                  gb_method,
                   args.force_rebuild_lg)
 
 
