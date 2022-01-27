@@ -1,4 +1,7 @@
+#!/usr/bin/env python3
+
 import argparse
+from operator import concat
 import sys
 import urllib.request
 import base64
@@ -7,7 +10,13 @@ import os
 import tarfile
 import tempfile
 import shutil
+
 import shared
+
+from pathlib import Path
+
+import progress
+
 
 __all__ = [
     "DATASETS"
@@ -18,10 +27,22 @@ DATASETS = {
     'abb313': 'https://suitesparse-collection-website.herokuapp.com/MM/HB/abb313.tar.gz',
     'bcspwr03': 'https://suitesparse-collection-website.herokuapp.com/MM/HB/bcspwr03.tar.gz',
     'soc-LiveJournal': 'https://suitesparse-collection-website.herokuapp.com/MM/SNAP/soc-LiveJournal1.tar.gz',
-    'hollywood-09': 'https://suitesparse-collection-website.herokuapp.com/MM/LAW/hollywood-2009.tar.gz'
+    'hollywood-09': 'https://suitesparse-collection-website.herokuapp.com/MM/LAW/hollywood-2009.tar.gz',
+    'Journals': 'https://suitesparse-collection-website.herokuapp.com/MM/Pajek/Journals.tar.gz',
 }
 
 DATASETS_FOLDER = shared.DATASET
+
+
+def parent_directory(path: str) -> str:
+    parents = Path(path).resolve().parents
+    if len(parents) < 1:
+        raise Exception(f'Path `{path}` does not have a parent')
+    return parents[0]
+
+
+def file_name(path: str) -> str:
+    return Path(path).resolve().name
 
 
 def download_by_url(url: str, dest: str):
@@ -42,11 +63,8 @@ def download_by_url(url: str, dest: str):
                 return tarfile.open(archive_path, "r:")
             raise Exception(f'Archive {url} is not of type \'tar\'')
 
-        with urllib.request.urlopen(url) as url_file:
-            content = url_file.read()
-            with open(archive_path, 'wb') as dest_file:
-                dest_file.write(content)
-                print(f'Archive is downloaded: {archive_path}')
+        progress.download(url, archive_path)
+        print(f'Archive is downloaded: {archive_path}')
 
         with open_archive() as unarchived_file:
             unarchived_file.extractall(archive_folder)
@@ -54,21 +72,42 @@ def download_by_url(url: str, dest: str):
 
         archive_contents = []
         for dirpath, dirnames, filenames in os.walk(archive_folder):
-            archive_contents.extend(
-                list(map(lambda d: os.path.join(dirpath, d), filenames + dirnames)))
-        archive_contents = list(
-            filter(lambda filename: filename.endswith('.mtx'), archive_contents))
-        contents_str = ', '.join(archive_contents)
+            archive_folder = dirpath
+            archive_contents.extend(filenames + dirnames)
+
+        archive_contents = list(filter(
+            lambda filename: filename.endswith('.mtx'),
+            archive_contents
+        ))
+
+        contents_str = archive_contents[0] if len(archive_contents) == 1 else concat(
+            *map(lambda s: '\n\t- ' + s, archive_contents))
 
         if not archive_contents:
             raise Exception(
                 f'Archive {url} does not contain .mtx file: {contents_str}')
-        if len(archive_contents) > 1:
-            raise Exception(
-                f'Archive {url} contains more than two .mtx files: {contents_str}')
 
-        mtx_file = f'{archive_contents[0]}'
-        shutil.copyfile(src=mtx_file, dst=dest)
+        mtx_file = archive_contents[0]
+
+        srcs = [mtx_file]
+        dests = [dest]
+
+        if len(archive_contents) > 1:
+            dest_folder = parent_directory(dest)
+            print(f'Archive contains more than two .mtx files: {contents_str}')
+            print(f'They all be put in the {dest_folder}')
+
+            srcs = []
+            dests = []
+            for mtx_file in archive_contents:
+                srcs.append(mtx_file)
+                dests.append(os.path.join(dest_folder, file_name(mtx_file)))
+
+        assert len(srcs) == len(dests)
+
+        for src, dst in zip(srcs, dests):
+            shutil.copyfile(os.path.join(archive_folder, src), dst)
+            print(f'File received: {dst}')
 
 
 def get_dest_path(s: str, is_url: bool) -> str:
@@ -101,7 +140,8 @@ def download_safe(s: str, is_url: bool, use_cached: bool) -> bool:
         download(s, is_url, use_cached)
         return True
     except Exception as e:
-        print(f'An exception occured while downloading {s}: {e}', file=sys.stderr)
+        print(
+            f'An exception occured while downloading {s}: {e}', file=sys.stderr)
         return False
 
 
@@ -134,16 +174,12 @@ def main() -> bool:
     elif args.name:
         download(args.name, False, use_cached)
     else:
-        raise Exception("At least one argument from 'all', 'url' or 'name' must be provided")
+        raise Exception(
+            "At least one argument from 'all', 'url' or 'name' must be provided")
 
+    print('Done!')
     return success
 
 
 if __name__ == '__main__':
-    try:
-        if main():
-            print('Done!')
-        else:
-            raise Exception('Download was not successful')
-    except Exception as e:
-        print(f'{type(e).__name__}: {e}', file=sys.stderr)
+    main()
