@@ -40,7 +40,7 @@ class ToolConfigurations:
     def algo_exec_paths(self) -> List[Path]:
         paths = []
         for exec in self.algo_rel.values():
-            paths.append(self.build / exec + EXECUTABLE_EXT)
+            paths.append(self.build / exec.with_suffix(EXECUTABLE_EXT))
         return paths
 
     def algo_exec_names(self) -> List[str]:
@@ -50,7 +50,7 @@ class ToolConfigurations:
         return names
 
     def are_all_built(self) -> bool:
-        return util.check_paths_exist(self.algo_exec_names())
+        return util.check_paths_exist(self.algo_exec_paths())
 
 
 class SmArchitecture(Enum):
@@ -190,19 +190,25 @@ BUILD = Namespace(
 # Datasets
 
 
+@dataclass
+class DatasetSizeInfo:
+    max_n_edges: Optional[int]
+    iterations: int
+
+
 class DatasetSize(Enum):
-    # `size` = (`max_edges`, `iterations`)
-    tiny = (5000, 50),
-    small = (80000, 20),
-    medium = (500000, 10),
-    large = (2000000, 5),
-    extra_large = (None, 2)
+    # `size` = DatasetSizeInfo(`max_edges`, `iterations`)
+    tiny = DatasetSizeInfo(max_n_edges=5000, iterations=50)
+    small = DatasetSizeInfo(max_n_edges=80000, iterations=20)
+    medium = DatasetSizeInfo(max_n_edges=500000, iterations=10)
+    large = DatasetSizeInfo(max_n_edges=2000000, iterations=5)
+    extra_large = DatasetSizeInfo(max_n_edges=None, iterations=2)
 
     def iterations(self):
-        return self.value[1]
+        return self.value.iterations
 
     def max_n_edges(self) -> Optional[int]:
-        return self.value[0]
+        return self.value.max_n_edges
 
     def from_n_edges(n_edges: int):
         for d_size in list(DatasetSize):
@@ -214,8 +220,7 @@ class DatasetSize(Enum):
 DATASETS_PROPERTIES = DATASET_FOLDER / 'properties.json'
 
 DATASET_URL: Dict[str, str] = {
-    '1128_bus' 'https://suitesparse-collection-website.herokuapp.com/MM/HB/1138_bus.tar.gz'
-    'abb313': 'https://suitesparse-collection-website.herokuapp.com/MM/HB/abb313.tar.gz',
+    '1128_bus': 'https://suitesparse-collection-website.herokuapp.com/MM/HB/1138_bus.tar.gz',
     'bcspwr03': 'https://suitesparse-collection-website.herokuapp.com/MM/HB/bcspwr03.tar.gz',
     'soc-LiveJournal': 'https://suitesparse-collection-website.herokuapp.com/MM/SNAP/soc-LiveJournal1.tar.gz',
     'hollywood-09': 'https://suitesparse-collection-website.herokuapp.com/MM/LAW/hollywood-2009.tar.gz',
@@ -226,7 +231,6 @@ DEFAULT_SOURCE = 0
 
 BENCHMARK_DATASETS = [
     '1128_bus',
-    'abb313',
     'bcspwr03',
     'soc-LiveJournal',
     'hollywood-09',
@@ -243,11 +247,17 @@ def jobs_flag() -> str:
 
 def make_build_env() -> Dict[str, str]:
     env = os.environ.copy()
-    env['CC'] = BUILD.cc
-    env['CXX'] = BUILD.cxx
-    env['CUDAHOSTCXX'] = BUILD.cudacxx
 
-    print(
-        f'Using env: CC={BUILD.cc} CXX={BUILD.cxx} CUDAHOSTCXX={BUILD.cudacxx}')
+    additional_vars = {
+        'CC': BUILD.cc,
+        'CXX': BUILD.cxx,
+        'CUDAHOSTCXX': BUILD.cudacxx
+    }
+
+    for k, v in additional_vars.items():
+        if v is not None:
+            env[k] = str(v)
+
+    print(f'Using env: {additional_vars}')
 
     return env

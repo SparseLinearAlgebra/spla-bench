@@ -4,17 +4,19 @@ import drivers.driver as driver
 
 from lib.dataset import Dataset
 from lib.algorithm import AlgorithmName
+from lib.tool import ToolName
+from lib.dataset import DatasetValueType
 
 
 class DriverSpla(driver.Driver):
     def can_run_bfs(self, dataset: Dataset) -> bool:
-        raise NotImplementedError()
+        return dataset.get_element_type() == DatasetValueType.void
 
     def can_run_sssp(self, dataset: Dataset) -> bool:
-        raise NotImplementedError()
+        return dataset.get_element_type() == DatasetValueType.float
 
     def can_run_tc(self, dataset: Dataset) -> bool:
-        raise NotImplementedError()
+        return True
 
     def run_bfs(self,
                 dataset: Dataset,
@@ -48,16 +50,18 @@ class DriverSpla(driver.Driver):
                dataset: Dataset,
                num_iterations: int) -> driver.ExecutionResult:
 
+        dir_flag = 'true' if not dataset.get_directed() else 'false'
+
         output = subprocess.check_output([
             self.exec_path(AlgorithmName.tc),
             f"--mtxpath={dataset.path}",
             f"--niters={num_iterations}",
-            f"--directed={int(dataset.get_directed)}"
+            f"--undirected={dir_flag}"
         ])
         return DriverSpla._parse_output(output)
 
-    def name(self) -> str:
-        return 'spla'
+    def tool_name(self) -> ToolName:
+        return ToolName.spla
 
     @staticmethod
     def _parse_output(output):

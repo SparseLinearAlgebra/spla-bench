@@ -14,10 +14,11 @@ def build():
 
     subprocess.check_call(
         [
-            "cmake", SPLA_PATHS.sources,
-            "-DCMAKE_BUILD_TYPE=Release"
+            'cmake',
+            '-S', SPLA_PATHS.sources,
+            '-B', SPLA_PATHS.build,
+            '-DCMAKE_BUILD_TYPE=Release'
         ],
-        cwd=SPLA_PATHS.build,
         env=config.make_build_env()
     )
 

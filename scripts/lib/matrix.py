@@ -1,6 +1,6 @@
 import random
 
-from typing import List, Tuple, Union, Callable, Type, Optional
+from typing import List, Tuple, Union, Callable, Type, Optional, FrozenSet, Set
 from pathlib import Path
 
 
@@ -12,7 +12,7 @@ Void = type(None)
 
 
 def remove_comment(line: str) -> str:
-    return line[0:line.find("%")] if line else None
+    return line[:line.find("%")] if line else None
 
 
 def reader_header(line_iter) -> str:
@@ -25,10 +25,16 @@ def reader_header(line_iter) -> str:
 def load_header(path: Path) -> Tuple[int, int, int]:
     with path.open('r') as file:
         line = file.readline()
-        while not line is None and len(line) == 0:
-            line = remove_comment(file.readline())
-        n, m, nvals = line.split(' ')
+        while line.startswith('%'):
+            line = file.readline()
+        n, m, nvals = map(int, line.split(' '))
         return n, m, nvals
+
+
+def value_type_of_repr(repr: str) -> MatrixValueType:
+    if '.' in repr:
+        return float(repr)
+    return int(repr)
 
 
 def load(path: str) -> MatrixData:
@@ -60,7 +66,8 @@ def load(path: str) -> MatrixData:
 
             if has_values:
                 assert len(values) == 3
-                entries.append((i, j, int(values[2])))
+
+                entries.append((i, j, value_type_of_repr(values[2])))
             else:
                 assert len(values) == 2
                 entries.append((i, j))
@@ -93,7 +100,7 @@ def value_type(matrix: MatrixData) -> Optional[MatrixValueType]:
         return None
     if len(entries[0]) < 3:
         return None
-    return float if '.' in entries[0][2] else int
+    return type(entries[0][2])
 
 
 def has_values(matrix: MatrixData) -> bool:
@@ -132,8 +139,22 @@ def generate_values(matrix: MatrixData, generator: Callable[[], MatrixValueType]
     return (m, n, result)
 
 
-def is_directed(mtx: MatrixData) -> bool:
-    raise NotImplementedError()
+def is_directed(matrix: MatrixData) -> bool:
+    _, _, entries = matrix
+    all_edges: Set[Tuple[int, int]] = set()
+    has_vals = has_values(matrix)
+    for entry in entries:
+        if has_vals:
+            i, j, _ = entry
+        else:
+            i, j = entry
+        edge = (i, j)
+        edge_rev = (j, i)
+        if edge_rev in all_edges:
+            all_edges.remove(edge_rev)
+        else:
+            all_edges.add(edge)
+    return len(all_edges) == len(entries)
 
 
 def generate_directions(mtx: MatrixData) -> MatrixData:

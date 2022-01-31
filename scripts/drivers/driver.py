@@ -1,4 +1,5 @@
 import abc
+import statistics
 
 from pathlib import Path
 from dataclasses import dataclass
@@ -20,6 +21,18 @@ class ExecutionResult:
     """
     warm_up: int
     times: List[int]
+
+    def avg(self):
+        return statistics.mean(self.times)
+
+    def median(self):
+        return statistics.median(self.times)
+
+    def stdev(self):
+        return statistics.stdev(self.times)
+
+    def brief_str(self) -> str:
+        return f'warm_up={self.warm_up:.2f}ms, avg={self.avg():.2f}ms, median={self.median():.2f}ms, stdev={self.stdev():.2f}'
 
 
 class Driver:
@@ -105,7 +118,7 @@ class Driver:
         return config.tool_algo_exec_path(self.tool_name(), algo)
 
     def print_status(self, status: str, *args):
-        util.print_status(self.tool_name, status, *args)
+        util.print_status(self.tool_name(), status, *args)
 
     def build(self) -> bool:
         build_tool(self.tool_name())
@@ -129,11 +142,11 @@ class Driver:
         source = config.DEFAULT_SOURCE
 
         self.print_status('run',
-                          f'begin {str(algo.name)}',
+                          f'begin {algo.name}',
                           f'iterations={iterations}',
                           f'soure={source}')
 
-        result = None
+        result: ExecutionResult = None
 
         if algo == AlgorithmName.bfs:
             result = self.run_bfs(dataset, source, iterations)
@@ -142,6 +155,7 @@ class Driver:
         elif algo == AlgorithmName.tc:
             result = self.run_tc(dataset, iterations)
 
-        self.print_status('run', f'finish {str(algo.name)}', str(result))
+        self.print_status(
+            'run', f'finish {str(algo.name)}', result.brief_str())
 
         return result

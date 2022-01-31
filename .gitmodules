@@ -7,3 +7,6 @@
 [submodule "deps/lagraph"]
 	path = deps/lagraph
 	url = https://github.com/GraphBLAS/LAGraph
+[submodule "deps/spla"]
+	path = deps/spla
+	url = https://github.com/JetBrains-Research/spla

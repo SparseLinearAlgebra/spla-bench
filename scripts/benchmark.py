@@ -68,19 +68,19 @@ def main():
                          'check if all tools can be used')
 
             all_can_run = all(map(
-                lambda driver: driver.can_run(dataset), drivers
+                lambda driver: driver.can_run(dataset, algo), drivers
             ))
 
             if not all_can_run:
                 print_status(status_algo_dataset,
-                             f'not runnable on {dataset.name}, skipping')
+                             f'not runnable on some drivers, skipping')
                 continue
 
             print_status(status_algo_dataset, 'start benchmarking')
             for driver in drivers:
                 status = f'algo: {algo}, dataset: {dataset.name}, tool: {str(driver.tool_name())}'
                 print_status(status, 'start benchmarking')
-                driver.run(algo)
+                driver.run(dataset, algo)
                 print_status(status, 'finish benchmarking')
             print_status(status_algo_dataset, 'finish benchmarking')
 

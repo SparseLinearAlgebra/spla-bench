@@ -7,7 +7,7 @@ import json
 from enum import Enum
 from pathlib import Path
 from operator import concat
-from typing import List, Any, Optional, Type, Callable
+from typing import List, Any, Optional, Type, Callable, Dict
 
 import config
 import lib.progress as progress
@@ -37,7 +37,7 @@ def download_by_url(url: str, dest: Path):
             archive_contents.extend(map(Path, filenames + dirnames))
 
         archive_contents = list(filter(
-            lambda filename: filename.endswith('.mtx'),
+            lambda filename: filename.suffix == '.mtx',
             archive_contents
         ))
 
@@ -74,14 +74,38 @@ def download_by_url(url: str, dest: Path):
 
 
 class DatasetPropertiesCache:
+    def load_properties() -> Dict:
+        config.DATASETS_PROPERTIES.touch()
+        properties: Dict = None
+        with config.DATASETS_PROPERTIES.open('r') as prop_file:
+            try:
+                properties = json.load(prop_file)
+            except json.decoder.JSONDecodeError as e:
+                if e.pos == 0:
+                    properties = {}
+                else:
+                    raise e
+        return properties
+
     def set(dataset_name: str, key: Any, value: Any):
-        raise NotImplementedError()
+        properties = DatasetPropertiesCache.load_properties()
+        if dataset_name not in properties:
+            properties[dataset_name] = {}
+        properties[dataset_name][key] = value
 
-    def get(dataset_name: str, key: Any, type: Type) -> Any:
-        raise NotImplementedError()
+        with config.DATASETS_PROPERTIES.open('w') as prop_file:
+            prop_file.write(json.dumps(properties))
 
-    def get_or_eval(dataset_name: str, key: Any, get_value: Callable, type: Type) -> Any:
-        cached_value = DatasetPropertiesCache.get(dataset_name, key, type)
+    def get(dataset_name: str, key: Any) -> Any:
+        properties = DatasetPropertiesCache.load_properties()
+
+        if dataset_name not in properties or key not in properties[dataset_name]:
+            return None
+
+        return properties[dataset_name][key]
+
+    def get_or_eval(dataset_name: str, key: Any, get_value: Callable):
+        cached_value = DatasetPropertiesCache.get(dataset_name, key)
         if cached_value is not None:
             return cached_value
         value = get_value()
@@ -109,7 +133,7 @@ def download(name: str) -> Path:
 def get_dataset(name: str) -> Path:
     dataset_local_path = make_dest_path(name)
 
-    has_cached = DatasetPropertiesCache.get(name, 'path', Path) is not None
+    has_cached = DatasetPropertiesCache.get(name, 'path') is not None
     has_url = name in config.DATASET_URL
     is_downloaded = dataset_local_path.exists()
 
@@ -120,9 +144,9 @@ def get_dataset(name: str) -> Path:
     def get_dataset_named():
         if has_url and not is_downloaded:
             download(name)
-        return dataset_local_path
+        return str(dataset_local_path)
 
-    return DatasetPropertiesCache.get_or_eval(name, 'path', get_dataset_named, Path)
+    return Path(DatasetPropertiesCache.get_or_eval(name, 'path', get_dataset_named))
 
 
 class DatasetValueType(Enum):
@@ -147,7 +171,8 @@ def dataset_type_from_type(python_type: Type) -> DatasetValueType:
 
 
 def dataset_type_from_repr(type_name: str) -> DatasetValueType:
-    assert type_name is not None
+    if type_name == 'none':
+        return None
     for dataset_type in list(DatasetValueType):
         if type_name == str(dataset_type):
             return dataset_type
@@ -164,6 +189,7 @@ class Dataset:
     def __init__(self, name: str):
         self.name = name
         self.path = get_dataset(name)
+        # assert(type(self.path) == Path)
 
     def get_directed(self) -> bool:
         def calculate_directed():
@@ -173,17 +199,16 @@ class Dataset:
             self.name,
             'directed',
             calculate_directed,
-            bool)
+        )
 
     def get_element_type(self) -> DatasetValueType:
         def calculate_type():
             matrix_data = matrix.load(self.path)
-            return dataset_type_from_type(matrix.value_type(matrix_data))
-        return DatasetPropertiesCache.get_or_eval(
+            return str(dataset_type_from_type(matrix.value_type(matrix_data)))
+        return dataset_type_from_repr(DatasetPropertiesCache.get_or_eval(
             self.name,
             'element_type',
-            calculate_type,
-            DatasetValueType)
+            calculate_type))
 
     def get_properties(self) -> DatasetProperties:
         return DatasetProperties(
