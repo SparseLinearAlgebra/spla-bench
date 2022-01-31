@@ -2,6 +2,7 @@ import itertools
 import subprocess
 
 import config
+import lib.util as util
 
 from lib.tool import ToolName
 
@@ -20,7 +21,7 @@ def build():
     if not autodetect:
         autodetect_or_gencode = f"-DGUNROCK_GENCODE_{str(gencode)}=ON"
 
-    subprocess.check_call(
+    util.check_call(
         [
             "cmake", str(GUNROCK_CONFIG.sources),
             "-B", str(GUNROCK_CONFIG.build)
@@ -28,7 +29,7 @@ def build():
         env=env
     )
 
-    subprocess.check_call(
+    util.check_call(
         [
             "cmake", "--build", str(GUNROCK_CONFIG.build),
             autodetect_or_gencode

@@ -6,6 +6,7 @@ import config
 from lib.algorithm import AlgorithmName
 from lib.tool import ToolName
 from lib.dataset import Dataset
+from lib.util import check_output
 
 
 class DriverGraphBLAST(driver.Driver):
@@ -31,13 +32,13 @@ class DriverGraphBLAST(driver.Driver):
 
         directed_flag = 1 if dataset.get_directed() else 2
 
-        output = subprocess.check_output([str(self.exec_path(AlgorithmName.bfs)),
-                                          f"--source={source_vertex}",
-                                          f"--niter={num_iterations}",
-                                          f"--timing={self.timing}",
-                                          f"--directed={directed_flag}",
-                                          f"--skip_cpu_verify={self.skip_cpu_verify}",
-                                          str(dataset.path)])
+        output = check_output([str(self.exec_path(AlgorithmName.bfs)),
+                               f"--source={source_vertex}",
+                               f"--niter={num_iterations}",
+                               f"--timing={self.timing}",
+                               f"--directed={directed_flag}",
+                               f"--skip_cpu_verify={self.skip_cpu_verify}",
+                               str(dataset.path)])
         return DriverGraphBLAST._parse_output(output, num_iterations)
 
     def run_sssp(self,
@@ -47,13 +48,13 @@ class DriverGraphBLAST(driver.Driver):
 
         directed_flag = 1 if dataset.get_directed() else 2
 
-        output = subprocess.check_output([str(self.exec_path(AlgorithmName.sssp)),
-                                          f"--source={source_vertex}",
-                                          f"--niter={num_iterations}",
-                                          f"--timing={self.timing}",
-                                          f"--directed={directed_flag}",
-                                          f"--skip_cpu_verify={self.skip_cpu_verify}",
-                                          str(dataset.path)])
+        output = check_output([str(self.exec_path(AlgorithmName.sssp)),
+                               f"--source={source_vertex}",
+                               f"--niter={num_iterations}",
+                               f"--timing={self.timing}",
+                               f"--directed={directed_flag}",
+                               f"--skip_cpu_verify={self.skip_cpu_verify}",
+                               str(dataset.path)])
         return DriverGraphBLAST._parse_output(output, num_iterations)
 
     def run_tc(self,
@@ -62,12 +63,12 @@ class DriverGraphBLAST(driver.Driver):
 
         directed_flag = 1 if dataset.get_directed() else 2
 
-        output = subprocess.check_output([str(self.exec_path(AlgorithmName.tc)),
-                                          f"--niter={num_iterations}",
-                                          f"--timing={self.timing}",
-                                          f"--directed={directed_flag}",
-                                          f"--skip_cpu_verify={self.skip_cpu_verify}",
-                                          str(dataset.path)])
+        output = check_output([str(self.exec_path(AlgorithmName.tc)),
+                               f"--niter={num_iterations}",
+                               f"--timing={self.timing}",
+                               f"--directed={directed_flag}",
+                               f"--skip_cpu_verify={self.skip_cpu_verify}",
+                               str(dataset.path)])
         return DriverGraphBLAST._parse_output(output, num_iterations)
 
     def tool_name(self) -> ToolName:

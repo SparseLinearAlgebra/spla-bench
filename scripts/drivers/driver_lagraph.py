@@ -1,12 +1,13 @@
 import os
-import subprocess
 import time
+
+from typing import List
 
 from drivers.driver import ExecutionResult, Driver
 from lib.dataset import Dataset
 from lib.algorithm import AlgorithmName
 from lib.tool import ToolName
-from typing import List
+from lib.util import check_output
 
 
 class DriverLaGraph(Driver):
@@ -25,7 +26,7 @@ class DriverLaGraph(Driver):
                 num_iterations: int) -> ExecutionResult:
 
         with TemporarySourcesFile([source_vertex + 1] * num_iterations) as sources_file:
-            output = subprocess.check_output([
+            output = check_output([
                 self.exec_path(AlgorithmName.bfs),
                 dataset.path,
                 sources_file.name
@@ -39,7 +40,7 @@ class DriverLaGraph(Driver):
                  num_iterations: int) -> ExecutionResult:
 
         with TemporarySourcesFile([source_vertex + 1] * num_iterations) as sources_file:
-            output = subprocess.check_output([
+            output = check_output([
                 self.exec_path(AlgorithmName.sssp),
                 dataset.path,
                 sources_file.name
@@ -51,7 +52,7 @@ class DriverLaGraph(Driver):
                dataset: Dataset,
                num_iterations: int) -> ExecutionResult:
 
-        output = subprocess.check_output([
+        output = check_output([
             self.exec_path(AlgorithmName.tc),
             dataset.path
         ])

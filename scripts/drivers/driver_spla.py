@@ -1,11 +1,10 @@
-import subprocess
-
 import drivers.driver as driver
 
 from lib.dataset import Dataset
 from lib.algorithm import AlgorithmName
 from lib.tool import ToolName
 from lib.dataset import DatasetValueType
+from lib.util import check_output
 
 
 class DriverSpla(driver.Driver):
@@ -23,7 +22,7 @@ class DriverSpla(driver.Driver):
                 source_vertex: int,
                 num_iterations: int) -> driver.ExecutionResult:
 
-        output = subprocess.check_output([
+        output = check_output([
             self.exec_path(AlgorithmName.bfs),
             f"--mtxpath={dataset.path}",
             f"--niters={num_iterations}",
@@ -37,7 +36,7 @@ class DriverSpla(driver.Driver):
                  source_vertex: int,
                  num_iterations: int) -> driver.ExecutionResult:
 
-        output = subprocess.check_output([
+        output = check_output([
             self.exec_path(AlgorithmName.sssp),
             f"--mtxpath={dataset.path}",
             f"--niters={num_iterations}",
@@ -52,7 +51,7 @@ class DriverSpla(driver.Driver):
 
         dir_flag = 'true' if not dataset.get_directed() else 'false'
 
-        output = subprocess.check_output([
+        output = check_output([
             self.exec_path(AlgorithmName.tc),
             f"--mtxpath={dataset.path}",
             f"--niters={num_iterations}",

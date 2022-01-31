@@ -9,7 +9,7 @@ import config
 import lib.progress as progress
 
 from lib.tool import ToolName
-from lib.util import check_paths_exist
+from lib.util import check_paths_exist, check_call
 
 
 LAGRAPH_PATHS = config.TOOL_CONFIG[ToolName.lagraph]
@@ -48,7 +48,7 @@ def suitesparse_build() -> Tuple[Path, Path]:
 
     if not gb_cloned:
         print(f'Cloning GraphBLAS from {sp_info.url} to the {sp_info.dest}')
-        subprocess.check_call(
+        check_call(
             [
                 'git', 'clone', '--recursive',
                 sp_info.url,
@@ -59,7 +59,7 @@ def suitesparse_build() -> Tuple[Path, Path]:
         print(f'GraphBLAS is already cloned to the {output_directory}')
 
     print(f'Checking out branch {sp_info.branch}')
-    subprocess.check_call(
+    check_call(
         [
             'git', 'checkout',
             sp_info.branch
@@ -71,14 +71,14 @@ def suitesparse_build() -> Tuple[Path, Path]:
 
     env = config.make_build_env()
 
-    subprocess.check_call(
+    check_call(
         [
             'cmake', '..'
         ],
         cwd=gb_build, env=env
     )
 
-    subprocess.check_call(
+    check_call(
         [
             'make',
             config.jobs_flag()
@@ -176,7 +176,7 @@ def build():
     env['GRAPHBLAS_INCLUDE_DIR'] = graphblas_include
     env['GRAPHBLAS_LIBRARY'] = graphblas_library
 
-    subprocess.check_call(
+    check_call(
         [
             'cmake', '..',
             f'-DGRAPHBLAS_INCLUDE_DIR={graphblas_include}',
@@ -186,7 +186,7 @@ def build():
         env=env
     )
 
-    subprocess.check_call(
+    check_call(
         [
             'make',
             config.jobs_flag()

@@ -4,6 +4,7 @@ import os
 import config
 
 from lib.tool import ToolName
+from lib.util import check_call
 
 SPLA_PATHS = config.TOOL_CONFIG[ToolName.spla]
 
@@ -12,7 +13,7 @@ def build():
     if not os.path.exists(SPLA_PATHS.build):
         os.makedirs(SPLA_PATHS.build)
 
-    subprocess.check_call(
+    check_call(
         [
             'cmake',
             '-S', SPLA_PATHS.sources,
@@ -22,7 +23,7 @@ def build():
         env=config.make_build_env()
     )
 
-    subprocess.check_call(
+    check_call(
         [
             "make", config.jobs_flag()
         ],

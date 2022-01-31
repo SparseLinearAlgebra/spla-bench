@@ -34,6 +34,12 @@ class ExecutionResult:
     def brief_str(self) -> str:
         return f'warm_up={self.warm_up:.2f}ms, avg={self.avg():.2f}ms, median={self.median():.2f}ms, stdev={self.stdev():.2f}'
 
+    def __str__(self) -> str:
+        return self.brief_str()
+
+    def __repr__(self) -> str:
+        return self.brief_str()
+
 
 class Driver:
     def __init__(self):

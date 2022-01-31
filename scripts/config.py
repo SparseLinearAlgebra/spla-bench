@@ -237,6 +237,8 @@ BENCHMARK_DATASETS = [
     'Journals'
 ]
 
+BENCHMARK_OUTPUT = ROOT / 'benchmarks'
+
 
 def jobs_flag() -> str:
     assert BUILD.jobs > 0
