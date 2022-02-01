@@ -1,0 +1,16 @@
+{
+    "1128_bus": {
+        "path": "/Users/glebmarin/projects/spla-bench/dataset/1128_bus.mtx",
+        "element_type": "float",
+        "directed": true
+    },
+    "bcspwr03": {
+        "path": "/Users/glebmarin/projects/spla-bench/dataset/bcspwr03.mtx",
+        "element_type": "void",
+        "directed": true
+    },
+    "soc-LiveJournal": {
+        "path": "/Users/glebmarin/projects/spla-bench/dataset/soc-LiveJournal.mtx",
+        "element_type": "void"
+    }
+}

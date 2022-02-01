@@ -1,58 +1,66 @@
 import os
-import pathlib
-import subprocess
-import re
-import shutil
 import time
 
 from typing import List
 
-import shared
-
-from driver import ExecutionResult, Driver
-
-__all__ = [
-    "DriverLaGraph"
-]
+from drivers.driver import ExecutionResult, Driver
+from lib.dataset import Dataset
+from lib.algorithm import AlgorithmName
+from lib.tool import ToolName
+from lib.util import check_output
 
 
 class DriverLaGraph(Driver):
-    """
-    LaGraph library driver
-    Use `BENCH_DRIVER_LAGRAPH` env variable to specify custom path to lagraph driver
-    """
+    def can_run_bfs(self, dataset: Dataset) -> bool:
+        raise NotImplementedError()
 
-    def __init__(self, lagraph_build_root: pathlib.Path):
-        self.exec_dir = lagraph_build_root / "src" / "benchmark"
-        if not os.path.exists(self.exec_dir):
-            raise Exception(
-                f'LaGraph exec dir does not exist, where it should be: {self.exec_dir}')
-        self.lagraph_bfs = "bfs_demo" + shared.EXECUTABLE_EXT
-        self.lagraph_sssp = "sssp_demo" + shared.EXECUTABLE_EXT
-        self.lagraph_tc = "tc_demo" + shared.EXECUTABLE_EXT
+    def can_run_sssp(self, dataset: Dataset) -> bool:
+        raise NotImplementedError()
 
-        try:
-            self.exec_dir = pathlib.Path(os.environ["BENCH_DRIVER_LAGRAPH"])
-            print("Set lagraph exec dir to:", self.exec_dir)
-        except KeyError:
-            pass
+    def can_run_tc(self, dataset: Dataset) -> bool:
+        raise NotImplementedError()
 
-    def run_bfs(self, matrix_path, source_vertex, num_iterations) -> ExecutionResult:
+    def run_bfs(self,
+                dataset: Dataset,
+                source_vertex: int,
+                num_iterations: int) -> ExecutionResult:
+
         with TemporarySourcesFile([source_vertex + 1] * num_iterations) as sources_file:
-            output = subprocess.check_output(
-                [str(self.exec_dir / self.lagraph_bfs), matrix_path, sources_file.name])
+            output = check_output([
+                self.exec_path(AlgorithmName.bfs),
+                dataset.path,
+                sources_file.name
+            ])
+
             return DriverLaGraph._parse_output(output, "parent only", 9, "warmup", 4)
 
-    def run_sssp(self, matrix_path, source_vertex, num_iterations) -> ExecutionResult:
+    def run_sssp(self,
+                 dataset: Dataset,
+                 source_vertex: int,
+                 num_iterations: int) -> ExecutionResult:
+
         with TemporarySourcesFile([source_vertex + 1] * num_iterations) as sources_file:
-            output = subprocess.check_output(
-                [str(self.exec_dir / self.lagraph_sssp), matrix_path, sources_file.name])
+            output = check_output([
+                self.exec_path(AlgorithmName.sssp),
+                dataset.path,
+                sources_file.name
+            ])
+
             return DriverLaGraph._parse_output(output, "sssp", 8)
 
-    def run_tc(self, matrix_path) -> ExecutionResult:
-        output = subprocess.check_output(
-            [str(self.exec_dir / self.lagraph_tc), matrix_path])
+    def run_tc(self,
+               dataset: Dataset,
+               num_iterations: int) -> ExecutionResult:
+
+        output = check_output([
+            self.exec_path(AlgorithmName.tc),
+            dataset.path
+        ])
+
         return DriverLaGraph._parse_output(output, "trial ", 2, "nthreads: ", 3)
+
+    def tool_name(self) -> ToolName:
+        return ToolName.lagraph
 
     @staticmethod
     def _parse_output(output: bytes,
