@@ -21,11 +21,11 @@ def parent_directory(path: Path) -> Path:
     return parents[0]
 
 
-def check_call(args, *other_args):
+def check_call(args, *other_args, **kwargs):
     print_status('subprocess', 'check_call', *args)
-    return subprocess.check_call(args, *other_args)
+    return subprocess.check_call(args, *other_args, **kwargs)
 
 
-def check_output(args, *other_args):
+def check_output(args, *other_args, **kwargs):
     print_status('subprocess', 'check_output', *args)
-    return subprocess.check_output(args, *other_args)
+    return subprocess.check_output(args, *other_args, **kwargs)

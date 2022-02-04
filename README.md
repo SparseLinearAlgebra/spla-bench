@@ -46,9 +46,30 @@ $ git submodule update --init --recursive
 
 ### Build third-party tools
 
-The first time benchmarks are run, those and only those libraries that will be needed for the benchmark will be automatically built. They will be built accordingly to the [`scripts.py`](./scripts/config.py) file. Therefore, if you want to modify default build settings, please see this configuration file and change configuration variables which are marked `[MUTABLE]`.
+The first time benchmarks are run, those and only those libraries that will be needed for the benchmark will be automatically built. They will be built accordingly to the [`scripts/config.py`](./scripts/config.py) file. Therefore, if you want to modify default build settings, please see this configuration file and change configuration variables which are marked `[MUTABLE]`.
 
-> Note: It is highly recommended to visit the configuration file [`scripts.py`](./scripts/config.py) and study meaning of settings and see if they match your desires.
+> Note: It is highly recommended to visit the configuration file [`scripts/config.py`](./scripts/config.py) and study meaning of settings and see if they match your desires.
+
+Meanwhile, you also can build any particular tool. To do that, use [`scripts/build_tool.py`](./scripts/build_tool.py)
+
+```shell
+$ ./scripts/build_tool.py -h
+usage: Third party libraries building tool [-h] [-j J] [--cc CC] [--cxx CXX] [--cudacxx CUDACXX]
+                                           {graphblast,spla,lagraph,gunrock}
+
+positional arguments:
+  {graphblast,spla,lagraph,gunrock}
+                        Select tool to build
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -j J                  Number of jobs to build
+  --cc CC               Path to the C compiler
+  --cxx CXX             Path to the C++ compiler
+  --cudacxx CUDACXX     Path to the Cuda compiler
+```
+
+> Note: `scripts/build_tool.py` flags will override `scripts/config.py` build settings
 
 #### GraphBLAST
 
@@ -101,7 +122,7 @@ There are two ways to use dataset in the benchmarks
 
 #### Download
 
-All of the used datasets downloaded also automatically when needed. To add more datasets to the benchmark, add more urls to the `DATASET_URL` dictionary in the [`scripts.py`](./scripts/config.py) file.
+All of the used datasets downloaded also automatically when needed. To add more datasets to the benchmark, add more urls to the `DATASET_URL` dictionary in the [`scripts/config.py`](./scripts/config.py) file.
 
 #### Use local
 
@@ -117,7 +138,7 @@ You also can test your local `.mtx` dataset. To do this, add a JSON object, whic
 }
 ```
 
-After you set the dataset url, or configured its the local version, please add its name to the `BENCHMARK_DATASETS` list in the [`scripts.py`](./scripts/config.py). This list represents datasets, on which the bechmarks will be run. 
+After you set the dataset url, or configured its the local version, please add its name to the `BENCHMARK_DATASETS` list in the [`scripts/config.py`](./scripts/config.py). This list represents datasets, on which the bechmarks will be run. 
 
 > Note: Name of the dataset (key in this dictionary) must match
 name of the `.mtx` file in the archive

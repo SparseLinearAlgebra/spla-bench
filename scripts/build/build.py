@@ -38,6 +38,10 @@ def build_tool(tool: ToolName):
     build(TOOL_BUILDERS[tool], TOOL_CONFIG[tool].algo_exec_paths())
 
 
+def rebuild_tool(tool: ToolName):
+    rebuild(TOOL_BUILDERS[tool], TOOL_CONFIG[tool].algo_exec_paths())
+
+
 def build_suitesparse() -> Tuple[Path, Path]:
     if check_paths_exist(suitesparse.chosen_method_targets()):
         return
