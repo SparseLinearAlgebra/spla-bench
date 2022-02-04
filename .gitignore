@@ -26,3 +26,6 @@ _deps
 
 ## Datasets downloaded matrices
 /dataset
+
+## Benchmark outputs
+/benchmarks
