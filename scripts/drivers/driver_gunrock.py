@@ -1,10 +1,9 @@
-import subprocess
-
 import drivers.driver as driver
 
 from lib.dataset import Dataset
 from lib.algorithm import AlgorithmName
 from lib.tool import ToolName
+from lib.util import check_output
 
 
 class DriverGunrock(driver.Driver):

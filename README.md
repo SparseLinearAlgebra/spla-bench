@@ -23,8 +23,6 @@ Part of the Spla research project.
 
 > Note: OpenCL SDK and Boost must be installed to build and run (1) benchmarks
 
-> Note: SuiteSparse library must be installed on your system in order to build and run (2) benchmarks
-
 > Note: CUDA SDK must be installed on your system in order to build and run (3) (4) benchmarks
 
 ### Dataset
@@ -48,6 +46,10 @@ $ git submodule update --init --recursive
 
 ### Build third-party tools
 
+The first time benchmarks are run, those and only those libraries that will be needed for the benchmark will be automatically built. They will be built accordingly to the [`scripts.py`](./scripts/config.py) file. Therefore, if you want to modify default build settings, please see this configuration file and change configuration variables which are marked `[MUTABLE]`.
+
+> Note: It is highly recommended to visit the configuration file [`scripts.py`](./scripts/config.py) and study meaning of settings and see if they match your desires.
+
 #### GraphBLAST
 
 Prerequisites:
@@ -55,16 +57,6 @@ Prerequisites:
  - Compatible GCC (8 for CUDA 10)
  - Boost library
  - Make
-
-To build library execute the following script.
-Must be executed inside root folder.
-
-```shell
-$ python scripts/build_graphblast.py
-```
-
-After successful build executable benchmark applications `gbfs`, `gsssp`, `gcc`, `gtc`
-will be located inside `deps/graphblast/bin` directory.
 
 #### Gunrock
 
@@ -74,57 +66,123 @@ Prerequisites:
 - Boost library
 - CMake & Make
 
-To build library execute the following script.
-Must be executed inside root folder.
 
-```shell
-$ python scripts/build_gunrock.py
+#### Spla
+
+Prerequisites:
+- C++ Compiler with C++ 17 support
+- OpenCL 1.2+ SDK
+- Boost library
+- CMake & Make
+
+#### LaGraph
+
+Prerequisites:
+- Make
+- C++ Compiler which is visible by Make
+- GraphBLAS
+
+To run lagraph you need to have GraphBLAS installed. But it is not necessarily should exist on your computer before benchmark execution.
+There are three ways to give GraphBLAS to the LaGraph:
+
+- Configure GraphBLAS headers and library path in the [`scripts/config.py`](scripts/config.py) file - variable `SUITESPARSE.local`
+
+- (Default) Built it from sources from GitHub - `SUITESPARSE.repo`
+
+- Download binaries and library from conda repo - `SUITESPARSE.download`
+
+> Note: You must choose exactly one way. Otherwise, the building script will not know which way of installation to use
+
+Visit [`scripts/config.py`](scripts/config.py) to see how exactly configure this variables.
+
+### Add the datasets
+
+There are two ways to use dataset in the benchmarks
+
+#### Download
+
+All of the used datasets downloaded also automatically when needed. To add more datasets to the benchmark, add more urls to the `DATASET_URL` dictionary in the [`scripts.py`](./scripts/config.py) file.
+
+#### Use local
+
+You also can test your local `.mtx` dataset. To do this, add a JSON object, which describes your dataset to the `DATASETS_PROPERTIES` file (`/dataset/properties.json` by default). For example:
+
+```json
+"1128_bus": {
+    "path": "/some/absolute/local/path/dataset_name.mtx",
+
+// Set the following fields only if you sure. Otherwise, you may not add the particular field
+    "element_type": "void", // (float, int)
+    "directed": true
+}
 ```
 
-After successful build executable benchmark applications `bfs`, `sssp`, `tc`
-will be located inside `deps/gunrock/build/bin` directory.
+After you set the dataset url, or configured its the local version, please add its name to the `BENCHMARK_DATASETS` list in the [`scripts.py`](./scripts/config.py). This list represents datasets, on which the bechmarks will be run. 
 
-### Download dataset
+> Note: Name of the dataset (key in this dictionary) must match
+name of the `.mtx` file in the archive
 
-The following code snippet allows downloading, unpack and store locally all required
-graph matrices for benchmarking. Downloading is done by `dataset.py` script inside `scripts` folder.
-Must be executed inside root folder.
+### Execute benchmarks
 
-```shell
-$ python scripts/dataset.py --all
-```
+To execute benchmarks, use [`scripts/benchmark.py`](./scripts/benchmark.py script.
 
-See `-h` option to get more info about available script features.
-Must be executed inside root folder.
+To run benchmarks, just execute it
 
 ```shell
-$ python scripts/dataset.py -h
+$ ./scripts/benchmark.py -h
+usage: benchmark.py [-h] [--algo {bfs,tc,sssp}] [--tool {graphblast,spla,lagraph,gunrock}] [--output OUTPUT]
+                    [--format {OutputFormat.raw,OutputFormat.csv}] [--printer {all,median}]
 
-usage: dataset.py [-h] [--all] [--name NAME] [--url URL] [--print] [--ignore_cached]
+Bebchmarking tool for the graph algorithms
 
 optional arguments:
-  -h, --help       show this help message and exit
-  --all            Download all datasets
-  --name NAME      Download dataset by name
-  --url URL        Download dataset by url
-  --print          Print all default datasets
-  --ignore_cached  Ignore cached datasets
+  -h, --help            show this help message and exit
+  --algo {bfs,tc,sssp}  Select algorithm to run (otherwise all algorithms are benchmarked)
+  --tool {graphblast,spla,lagraph,gunrock}
+                        Select tool to use (otherwise all tools are benchmarked)
+  --output OUTPUT       File to dump benchmark results
+  --format {OutputFormat.raw,OutputFormat.csv}
+                        Format to dump benchmark results
+  --printer {all,median}
+                        Measurement printer
 ```
+
+As you can see, it has different run configurations.
+They all described in the help section. It is worth mentioning, that `printer` configures information, which is printed about each run.
+
+- `all` will print all information: average time, median and standard deviation
+- `median` will print only the median time
+
+
+#### How the benchmark works
+
+You tell it which algorithms you want to use.
+All the specified algorithms will be built automatically, using a configuration file [`scripts/config.py`](scripts/config.py). If required executables are already built, they won't be rebuilt.
+
+Before using each dataset, the script will
+extract additional information about it: if the graph is directed and what is the type of the values on the edges. Retrieved information will
+be stored in the properties file ([`datasets/properties.json`](datasets/properties.json) by default)
+
+
+The script also accepts information about which algorithms you want to test.
+Therefore, if the build finishes without any errors, it will start testing each algorithm on every possible dataset (if it fits it by orientation, weighting).
+
+When testing ends (or an exception is thrown), information about runs is dumped to a folder (`benchmarks/${current_time}/` by default).
+For convenience, a symlink is created to the folder where the results with the latest results are stored (`benchmarks/recent/`).
 
 ## Directory structure
 
 ```
-spla
-├── .github - GitHub Actions CI/CD setup 
+spla-bench
+├── dataset - Datasets and their properties
 ├── docs - documents, text files and various helpful stuff
-├── ide - files to setup local ide for development 
-├── scripts - python sripts to prepare and run benchmarks
 ├── deps - benchmark third-party tools to test
 │   ├── spla - SPLA library (submodule)
 │   ├── lagraph - LAGraph library (submodule)
 │   ├── graphblast - GraphBLAST library (submodule)
 │   └── gunrock - Gunrock library (submodule)
-└── CMakeLists.txt - library cmake config, add this as sub-directory to your project
+├── ide - files to setup local ide for development 
+└── scripts - python sripts to prepare and run benchmarks
 ```
 
 ## Contributors
