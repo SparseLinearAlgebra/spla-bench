@@ -1,4 +1,3 @@
-from distutils.command import config
 import platform
 import os
 
@@ -14,27 +13,48 @@ from lib.tool import ToolName
 from lib.algorithm import AlgorithmName
 
 
-# System
+"""
+System information
+"""
 
 SYSTEM = {'Darwin': 'macos', 'Linux': 'linux',
           'Windows': 'windows'}[platform.system()]
 EXECUTABLE_EXT = {'macos': '', 'windows': '.exe', 'linux': ''}[SYSTEM]
 TARGET_SUFFIX = {'macos': '.dylib', 'linux': '.so', 'windows': '.dll'}[SYSTEM]
 
-# Global paths
 
+"""
+This repository paths
+"""
+
+# Path to the root directory of spla-bench project
 ROOT = Path(__file__).parent.parent
-DATASET_FOLDER = ROOT / 'dataset'
-DEPS = ROOT / 'deps'
 
-# Tools paths
+# Path to the directory, where datasets will be downloaded
+# [MUTABLE]
+DATASET_FOLDER = ROOT / 'dataset'
+
+# Path to the deps dataset
+DEPS = ROOT / 'deps'
 
 
 @dataclass
 class ToolConfigurations:
+
+    """
+    Paths and other information about the third party tools
+    """
+
+    # Path to the sources of tool
     sources: Path
+
+    # Path to the build directory of tool
     build: Path
+
+    # Relative paths to the algorithm binaries (from the build directory)
     algo_rel: Dict[AlgorithmName, Path]
+
+    # Other configurations of the tool
     config: Namespace
 
     def algo_exec_paths(self) -> List[Path]:
@@ -106,9 +126,11 @@ TOOL_CONFIG: Dict[ToolName, ToolConfigurations] = {
         },
         config=Namespace(
             # 0: do not display per iteration timing, 1: display per iteration timing
+            # [MUTABLE]
             timing=0,
 
             # False: run CPU verification, True: skip CPU algorithm verification
+            # [MUTABLE]
             skip_cpu_verify=False
         )
     ),
@@ -123,9 +145,11 @@ TOOL_CONFIG: Dict[ToolName, ToolConfigurations] = {
         },
         config=Namespace(
             # Autodetect target architecture
+            # [MUTABLE]
             autodetect=True,
 
             # Target sm and compute architecture
+            # [MUTABLE]
             gencode=SmArchitecture.SM61
         )
     )
@@ -136,8 +160,12 @@ def tool_algo_exec_path(name: ToolName, algo: AlgorithmName):
     return TOOL_CONFIG[name].build / TOOL_CONFIG[name].algo_rel[algo].with_suffix(EXECUTABLE_EXT)
 
 
-# Other libraries paths
+"""
+Conda repository with GraphBLAS build
 
+[MUTABLE]
+
+"""
 CONDA_GRB_REPO = Namespace(
     hash={
         'macos': 'h4a89273',
@@ -154,21 +182,52 @@ CONDA_GRB_REPO = Namespace(
     version='6.1.4'
 )
 
+"""
+Suitesparse.GraphBLAST installation information
+
+[MUTABLE]
+
+There are three ways to use suitesparse.
+   - Use local version (SUITESPARSE.local)
+   - Build it from sources, using GitHub repo (SUITESPARSE.repo)
+   - Download binaries form conda repository (SUITESPARSE.download)
+
+Before starting benchmarks choose exactly one way of usage
+and set corresponding values to non-null values
+
+"""
 SUITESPARSE = Namespace(
+
+    # Paths to the local version of suitesparse
     local=Namespace(
+        # Path to the include directory (Ex. "../graphblas/include/")
         include=None,
+        # Path to the library (Ex. "../graphblas/lib/libgraphblas.so")
         library=None
     ),
+
+    # GitHub repository information
     repo=Namespace(
         url='https://github.com/DrTimothyAldenDavis/GraphBLAS',
         branch='v6.1.4',
+
+        # Repository local path (where it will be cloned)
         dest=DEPS/'suitesparse_graphblast',
+
+        # Relative path to the include directory from the repository root
         include_rel=Path('Include'),
+
+        # Relative path to the build directory, where the library will be built
         build_rel=Path('build'),
+
+        # Relative path to the library binary
         library_rel=(Path('build') / 'libgraphblas').with_suffix(TARGET_SUFFIX)
     ),
+
+    # Conda repository information
     download=None,
 
+    # Uncomment, if you want to download the library
     # download=Namespace(
     #     url=f'https://anaconda.org/conda-forge/graphblas/{CONDA_GRB_REPO.version}/download/{CONDA_GRB_REPO.platform}/graphblas-{CONDA_GRB_REPO.version}-{CONDA_GRB_REPO.hash}_0.tar.bz2',
     #     dest=DEPS/'suitesparse_graphblast_conda',
@@ -178,25 +237,48 @@ SUITESPARSE = Namespace(
 )
 
 
-# Build configurations
+"""
+Build configurations
+"""
 
 BUILD = Namespace(
+    # Paths to the C/C++/Cuda compilers (let Cmake detect by default)
     cc=None,
     cxx=None,
     cudacxx='/usr/bin/g++-8',
+
+    # Number of jobs to build all sources (None will remove flag)
     jobs=6,
 )
 
-# Datasets
+
+"""
+Datasets configuration
+"""
 
 
 @dataclass
 class DatasetSizeInfo:
+    """
+    Information about the size of the dataset
+    """
+
+    # Maximal number of edges for this category of dataset largeness
     max_n_edges: Optional[int]
+
+    # Number of iterations for the algorithm to execute on the dataset of this size
     iterations: int
 
 
 class DatasetSize(Enum):
+    """
+    Size configurations
+
+    Change it to configure on how much iterations you want to
+    run benchmark on dataset of this size
+
+    [MUTABLE]
+    """
     # `size` = DatasetSizeInfo(`max_edges`, `iterations`)
     tiny = DatasetSizeInfo(max_n_edges=5000, iterations=50)
     small = DatasetSizeInfo(max_n_edges=80000, iterations=20)
@@ -217,8 +299,30 @@ class DatasetSize(Enum):
         raise Exception(f'Can not get largeness category of {n_edges} edges')
 
 
+"""
+Path to the file with the supportive information about datasets.
+It includes if dataset is directed or not and what is the value type
+in this dataset (void, float, int)
+
+This file is created automatically
+
+[MUTABLE]
+
+"""
 DATASETS_PROPERTIES = DATASET_FOLDER / 'properties.json'
 
+"""
+Urls of the datasets and their names
+You may add more urls to test more tests
+
+Note: Name of the dataset (key in this dictionary) must match
+name of the .mtx file in the archive
+
+Note: All datasets are taken from http://sparse.tamu.edu/
+
+[MUTABLE]
+
+"""
 DATASET_URL: Dict[str, str] = {
     '1128_bus': 'https://suitesparse-collection-website.herokuapp.com/MM/HB/1138_bus.tar.gz',
     'bcspwr03': 'https://suitesparse-collection-website.herokuapp.com/MM/HB/bcspwr03.tar.gz',
@@ -227,8 +331,24 @@ DATASET_URL: Dict[str, str] = {
     'Journals': 'https://suitesparse-collection-website.herokuapp.com/MM/Pajek/Journals.tar.gz',
 }
 
+
+"""
+Default source for the path-finding algorithms (bfs, sssp)
+
+[MUTABLE]
+
+"""
 DEFAULT_SOURCE = 0
 
+
+"""
+List of the datasets, which will be used for the benchmark
+Name must correspond to the key in the DATASET_URL dictionary,
+or to the .mtx
+
+[MUTABLE]
+
+"""
 BENCHMARK_DATASETS = [
     '1128_bus',
     'bcspwr03',
@@ -237,6 +357,19 @@ BENCHMARK_DATASETS = [
     'Journals'
 ]
 
+"""
+Path to the benchmarks output directory
+
+After each run of ./benchark.py script in the
+BENCHMARK_OUTPUT will be created folder with the bechmark results
+in .csv or .txt format. The folder will have name of the moment,
+when benchmarks were executed. Also, a symlink BENCHMARK_OUTPUT/recent
+will be created, which refers at the folder with the results
+of the most recent benchmarks run.
+
+[MUTABLE]
+
+"""
 BENCHMARK_OUTPUT = ROOT / 'benchmarks'
 
 
