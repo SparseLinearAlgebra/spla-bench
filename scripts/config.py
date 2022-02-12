@@ -352,7 +352,7 @@ BENCHMARK_DATASETS = [
     '1128_bus',
     'bcspwr03',
     'soc-LiveJournal',
-    'hollywood-09'
+    'hollywood-09',
     'com-Orcut',
     'roadNet-CA',
     'indochina-2004',
