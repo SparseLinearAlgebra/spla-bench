@@ -12,7 +12,6 @@ import lib.util as util
 from lib.tool import ToolName
 from lib.algorithm import AlgorithmName
 
-
 """
 System information
 """
@@ -21,7 +20,6 @@ SYSTEM = {'Darwin': 'macos', 'Linux': 'linux',
           'Windows': 'windows'}[platform.system()]
 EXECUTABLE_EXT = {'macos': '', 'windows': '.exe', 'linux': ''}[SYSTEM]
 TARGET_SUFFIX = {'macos': '.dylib', 'linux': '.so', 'windows': '.dll'}[SYSTEM]
-
 
 """
 This repository paths
@@ -40,7 +38,6 @@ DEPS = ROOT / 'deps'
 
 @dataclass
 class ToolConfigurations:
-
     """
     Paths and other information about the third party tools
     """
@@ -98,9 +95,9 @@ TOOL_CONFIG: Dict[ToolName, ToolConfigurations] = {
         sources=DEPS / 'lagraph',
         build=DEPS / 'lagraph' / 'build',
         algo_rel={
-            AlgorithmName.bfs:  Path('sources') / 'benchmark' / 'bfs_demo',
+            AlgorithmName.bfs: Path('sources') / 'benchmark' / 'bfs_demo',
             AlgorithmName.sssp: Path('sources') / 'benchmark' / 'sssp_demo',
-            AlgorithmName.tc:   Path('sources') / 'benchmark' / 'tc_demo'
+            AlgorithmName.tc: Path('sources') / 'benchmark' / 'tc_demo'
         },
         config=Namespace()
     ),
@@ -109,9 +106,9 @@ TOOL_CONFIG: Dict[ToolName, ToolConfigurations] = {
         sources=DEPS / 'spla',
         build=DEPS / 'spla' / 'build',
         algo_rel={
-            AlgorithmName.bfs:  Path('spla_bfs'),
+            AlgorithmName.bfs: Path('spla_bfs'),
             AlgorithmName.sssp: Path('spla_sssp'),
-            AlgorithmName.tc:   Path('spla_tc')
+            AlgorithmName.tc: Path('spla_tc')
         },
         config=Namespace()
     ),
@@ -120,9 +117,9 @@ TOOL_CONFIG: Dict[ToolName, ToolConfigurations] = {
         sources=DEPS / 'graphblast',
         build=DEPS / 'graphblast' / 'bin',
         algo_rel={
-            AlgorithmName.bfs:  Path('gbfs'),
+            AlgorithmName.bfs: Path('gbfs'),
             AlgorithmName.sssp: Path('gsssp'),
-            AlgorithmName.tc:   Path('gtc')
+            AlgorithmName.tc: Path('gtc')
         },
         config=Namespace(
             # 0: do not display per iteration timing, 1: display per iteration timing
@@ -139,9 +136,9 @@ TOOL_CONFIG: Dict[ToolName, ToolConfigurations] = {
         sources=DEPS / 'gunrock',
         build=DEPS / 'gunrock' / 'build',
         algo_rel={
-            AlgorithmName.bfs:  Path('') / 'bin' / 'bfs',
+            AlgorithmName.bfs: Path('') / 'bin' / 'bfs',
             AlgorithmName.sssp: Path('') / 'bin' / 'sssp',
-            AlgorithmName.tc:   Path('') / 'bin' / 'gtc',
+            AlgorithmName.tc: Path('') / 'bin' / 'gtc',
         },
         config=Namespace(
             # Autodetect target architecture
@@ -212,7 +209,7 @@ SUITESPARSE = Namespace(
         branch='v6.1.4',
 
         # Repository local path (where it will be cloned)
-        dest=DEPS/'suitesparse_graphblast',
+        dest=DEPS / 'suitesparse_graphblast',
 
         # Relative path to the include directory from the repository root
         include_rel=Path('Include'),
@@ -236,7 +233,6 @@ SUITESPARSE = Namespace(
     # )
 )
 
-
 """
 Build configurations
 """
@@ -250,7 +246,6 @@ BUILD = Namespace(
     # Number of jobs to build all sources (None will remove flag)
     jobs=6,
 )
-
 
 """
 Datasets configuration
@@ -337,7 +332,6 @@ DATASET_URL: Dict[str, str] = {
     'coPapersDBLP': 'https://suitesparse-collection-website.herokuapp.com/MM/DIMACS10/coPapersDBLP.tar.gz'
 }
 
-
 """
 Default source for the path-finding algorithms (bfs, sssp)
 
@@ -345,7 +339,6 @@ Default source for the path-finding algorithms (bfs, sssp)
 
 """
 DEFAULT_SOURCE = 0
-
 
 """
 List of the datasets, which will be used for the benchmark
@@ -359,8 +352,13 @@ BENCHMARK_DATASETS = [
     '1128_bus',
     'bcspwr03',
     'soc-LiveJournal',
-    'hollywood-09',
-    'Journals'
+    'hollywood-09'
+    'com-Orcut',
+    'roadNet-CA',
+    'indochina-2004',
+    'cit-Patents',
+    'coAuthorsCiteseer',
+    'coPapersDBLP'
 ]
 
 """
