@@ -145,7 +145,7 @@ name of the `.mtx` file in the archive
 
 ### Execute benchmarks
 
-To execute benchmarks, use [`scripts/benchmark.py`](./scripts/benchmark.py script.
+To execute benchmarks, use [`scripts/benchmark.py`](./scripts/benchmark.py) script.
 
 To run benchmarks, just execute it
 
