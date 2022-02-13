@@ -28,12 +28,16 @@ def download_by_url(url: str, dest: Path):
 
         os.makedirs(archive_folder)
 
+        util.print_status('dataset installer', 'downloading',
+                          f'{url} -> {archive_path}')
         progress.download(url, archive_path)
+        util.print_status('dataset installer', 'unarchiving',
+                          f'{archive_path} -> {archive_folder}')
         progress.unarchive(archive_path, archive_folder)
 
         archive_contents: List[Path] = []
         for dirpath, dirnames, filenames in os.walk(archive_folder):
-            archive_folder = dirpath
+            archive_folder = Path(dirpath)
             archive_contents.extend(map(Path, filenames + dirnames))
 
         archive_contents = list(filter(
@@ -42,7 +46,7 @@ def download_by_url(url: str, dest: Path):
         ))
 
         contents_str = archive_contents[0] if len(archive_contents) == 1 else concat(
-            *map(lambda s: '\n\t- ' + s, archive_contents)
+            *map(lambda s: '\n\t- ' + str(s), archive_contents)
         )
 
         if not archive_contents:
@@ -51,26 +55,29 @@ def download_by_url(url: str, dest: Path):
 
         mtx_file = archive_contents[0]
 
-        srcs = [mtx_file]
-        dests = [dest]
+        srcs: List[Path] = [archive_folder / mtx_file]
+        dests: List[Path] = [dest]
+
+        util.print_status('dataset installer', 'copying .mtx files')
 
         if len(archive_contents) > 1:
             dest_folder = util.parent_directory(dest)
-            print(f'Archive contains more than two .mtx files: {contents_str}')
-            print(f'They all be put in the {dest_folder}')
+            util.print_status('dataset installer',
+                              'copying .mtx files',
+                              f'Archive contains more than two .mtx files: {contents_str}',
+                              f'\nThey all be put in the {dest_folder}')
 
             srcs = []
             dests = []
             for mtx_file in archive_contents:
-                srcs.append(mtx_file)
-                dests.append(os.path.join(
-                    dest_folder, util.file_name(mtx_file)))
+                srcs.append(archive_folder / mtx_file)
+                dests.append(dest_folder / mtx_file.name)
 
         assert len(srcs) == len(dests)
 
         for src, dst in zip(srcs, dests):
-            shutil.copyfile(os.path.join(archive_folder, src), dst)
-            print(f'File received: {dst}')
+            util.print_status('dataset installer', 'copying .mtx files', f'{src} -> {dst}')
+            shutil.copyfile(src, dst)
 
 
 class DatasetPropertiesCache:

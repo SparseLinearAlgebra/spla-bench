@@ -132,8 +132,7 @@ You also can test your local `.mtx` dataset. To do this, add a JSON object, whic
 "1128_bus": {
     "path": "/some/absolute/local/path/dataset_name.mtx",
 
-// Set the following fields only if you sure. Otherwise, you may not add the particular field
-    "element_type": "void", // (float, int)
+    "element_type": "void",
     "directed": true
 }
 ```
