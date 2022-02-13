@@ -360,7 +360,12 @@ BENCHMARK_DATASETS = [
     'bcspwr03',
     'soc-LiveJournal',
     'hollywood-09',
-    'Journals'
+    'com-Orcut',
+    'roadNet-CA',
+    'indochina-2004',
+    'cit-Patents',
+    'coAuthorsCiteseer',
+    'coPapersDBLP'
 ]
 
 """
