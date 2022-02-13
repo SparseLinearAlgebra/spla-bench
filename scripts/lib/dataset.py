@@ -42,7 +42,7 @@ def download_by_url(url: str, dest: Path):
         ))
 
         contents_str = archive_contents[0] if len(archive_contents) == 1 else concat(
-            *map(lambda s: '\n\t- ' + s, archive_contents)
+            *map(lambda s: '\n\t- ' + str(s), archive_contents)
         )
 
         if not archive_contents:
